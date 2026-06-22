@@ -90,8 +90,8 @@
     </div>
 
     <div class="step" id="s2">
-      <div class="step-title">Sacá una foto</div>
-      <div class="step-desc">Mostrá lo que trajiste al punto Buply</div>
+      <div class="step-title" id="step-title-foto">Sacá una foto</div>
+      <div class="step-desc" id="step-desc-foto">Mostrá lo que trajiste al punto Buply</div>
       <label class="camera-zone" id="cameraZone">
         <input type="file" accept="image/*" capture="environment" id="fileInput" onchange="handleFoto(event)">
         <div class="cam-circle">
@@ -105,8 +105,8 @@
         <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <span>¡Foto lista!</span>
       </div>
-      <button class="btn btn-main" id="btnFoto" onclick="ir(3)" disabled>Continuar →</button>
-      <button class="btn btn-back" onclick="ir(1)">← Volver</button>
+      <button class="btn btn-main" id="btnFoto" onclick="usuarioGuardado ? enviar() : ir(3)" disabled>Continuar →</button>
+      <button class="btn btn-back" id="btnVolver2" onclick="ir(1)">← Volver</button>
     </div>
 
     <div class="step" id="s3">
@@ -152,6 +152,29 @@
 
   let paso = 0;
   let fotoBase64 = null;
+  let usuarioGuardado = null;
+
+  // Al cargar la página, verificar si ya hay datos guardados
+  window.onload = function() {
+    const datosGuardados = localStorage.getItem('buply_usuario');
+    if (datosGuardados) {
+      usuarioGuardado = JSON.parse(datosGuardados);
+      // Modo rápido: mostrar saludo y ir directo a foto
+      document.getElementById('s0').classList.remove('visible');
+      document.getElementById('d0').classList.add('done');
+      document.getElementById('d1').classList.add('done');
+      document.getElementById('d2').classList.add('done');
+      
+      // Mostrar paso de foto directamente con saludo
+      document.getElementById('step-title-foto').textContent = '¡Hola de nuevo, ' + usuarioGuardado.nombre + '!';
+      document.getElementById('step-desc-foto').textContent = 'Sacá una foto de lo que trajiste hoy';
+      document.getElementById('s2').classList.add('visible');
+      paso = 2;
+
+      // Ocultar botón volver en modo rápido
+      document.getElementById('btnVolver2').style.display = 'none';
+    }
+  };
 
   function ir(n) {
     if (n === 1) {
@@ -206,22 +229,37 @@
   }
 
   function enviar() {
-    const mail = document.getElementById('mail').value.trim();
-    if (!mail || !mail.includes('@')) { marcarError('mail'); return; }
+    let payload;
 
-    document.getElementById('s3').classList.remove('visible');
+    if (usuarioGuardado) {
+      // Usuario ya registrado — solo necesita la foto
+      payload = {
+        nombre: usuarioGuardado.nombre,
+        apellido: usuarioGuardado.apellido,
+        dni: usuarioGuardado.dni,
+        mail: usuarioGuardado.mail,
+        foto: fotoBase64
+      };
+      document.getElementById('s2').classList.remove('visible');
+    } else {
+      // Usuario nuevo
+      const mail = document.getElementById('mail').value.trim();
+      if (!mail || !mail.includes('@')) { marcarError('mail'); return; }
+      payload = {
+        nombre: document.getElementById('nombre').value.trim(),
+        apellido: document.getElementById('apellido').value.trim(),
+        dni: document.getElementById('dni').value.trim(),
+        mail: mail,
+        foto: fotoBase64
+      };
+      // Guardar datos para la próxima vez
+      localStorage.setItem('buply_usuario', JSON.stringify(payload));
+      document.getElementById('s3').classList.remove('visible');
+    }
+
     document.getElementById('dots').style.display = 'none';
     document.getElementById('loadingScreen').style.display = 'block';
 
-    const payload = {
-      nombre: document.getElementById('nombre').value.trim(),
-      apellido: document.getElementById('apellido').value.trim(),
-      dni: document.getElementById('dni').value.trim(),
-      mail: mail,
-      foto: fotoBase64
-    };
-
-    // Usar no-cors con FormData para evitar el problema de CORS
     const formData = new FormData();
     formData.append('data', JSON.stringify(payload));
 
