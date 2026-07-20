@@ -23,10 +23,15 @@
     .step.visible { display: block; }
     .step-title { font-size: 20px; font-weight: 900; color: #57aba9; margin-bottom: 4px; }
     .step-desc { font-size: 13px; color: #888; font-weight: 600; margin-bottom: 1.25rem; }
+    .returning-badge { display: inline-block; background: #e5f4f3; color: #57aba9; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; margin-bottom: 12px; }
     label.field-label { display: block; font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
     input[type="text"], input[type="tel"], input[type="email"] { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e0e0e0; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; color: #333; background: #f9f9f9; outline: none; transition: border-color 0.2s; margin-bottom: 1rem; }
     input:focus { border-color: #57aba9; background: #fff; }
     input.error { border-color: #e05a3a; }
+    input.prefilled { border-color: #57aba9; background: #f0f9f8; }
+    select.buply-select { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e0e0e0; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; color: #333; background: #f9f9f9; outline: none; transition: border-color 0.2s; margin-bottom: 1rem; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2357aba9' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+    select.buply-select:focus { border-color: #57aba9; background-color: #fff; }
+    select.buply-select.error { border-color: #e05a3a; }
     .camera-zone { width: 100%; padding: 24px 16px; border-radius: 20px; border: 2.5px dashed #57aba9; background: #e5f4f3; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; position: relative; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
     .camera-zone.has-photo { border-style: solid; }
     .camera-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; font-size: 0; }
@@ -67,11 +72,13 @@
     <div class="dot" id="d1"></div>
     <div class="dot" id="d2"></div>
     <div class="dot" id="d3"></div>
+    <div class="dot" id="d4"></div>
   </div>
   <div class="card" id="mainCard">
 
+    <!-- PASO 0: Nombre -->
     <div class="step visible" id="s0">
-      <div class="step-title">Hola, bienvenido</div>
+      <div class="step-title" id="title-s0">Hola, bienvenido</div>
       <div class="step-desc">¿Cuál es tu nombre?</div>
       <label class="field-label">Nombre</label>
       <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name">
@@ -80,6 +87,7 @@
       <button class="btn btn-main" onclick="ir(1)">Continuar →</button>
     </div>
 
+    <!-- PASO 1: DNI -->
     <div class="step" id="s1">
       <div class="step-title">Tu documento</div>
       <div class="step-desc">Número de DNI sin puntos</div>
@@ -89,9 +97,24 @@
       <button class="btn btn-back" onclick="ir(0)">← Volver</button>
     </div>
 
+    <!-- PASO 2: Estación -->
     <div class="step" id="s2">
-      <div class="step-title" id="step-title-foto">Sacá una foto</div>
-      <div class="step-desc" id="step-desc-foto">Mostrá lo que trajiste al punto Buply</div>
+      <div class="step-title">¿Dónde estás?</div>
+      <div class="step-desc">¿En qué Mini Estación te encontrás?</div>
+      <select class="buply-select" id="estacion">
+        <option value="">Seleccioná una opción...</option>
+        <option value="Hotel Ecomax">Hotel Ecomax</option>
+        <option value="Mercado del Molino">Mercado del Molino</option>
+        <option value="Municipalidad de Bariloche - Cerro Catedral">Municipalidad de Bariloche - Cerro Catedral</option>
+      </select>
+      <button class="btn btn-main" onclick="ir(3)">Continuar →</button>
+      <button class="btn btn-back" onclick="ir(1)">← Volver</button>
+    </div>
+
+    <!-- PASO 3: Foto -->
+    <div class="step" id="s3">
+      <div class="step-title">Sacá una foto</div>
+      <div class="step-desc">Mostrá lo que trajiste al punto Buply</div>
       <label class="camera-zone" id="cameraZone">
         <input type="file" accept="image/*" capture="environment" id="fileInput" onchange="handleFoto(event)">
         <div class="cam-circle">
@@ -105,25 +128,28 @@
         <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <span>¡Foto lista!</span>
       </div>
-      <button class="btn btn-main" id="btnFoto" onclick="usuarioGuardado ? enviar() : ir(3)" disabled>Continuar →</button>
-      <button class="btn btn-back" id="btnVolver2" onclick="ir(1)">← Volver</button>
+      <button class="btn btn-main" id="btnFoto" onclick="ir(4)" disabled>Continuar →</button>
+      <button class="btn btn-back" onclick="ir(2)">← Volver</button>
     </div>
 
-    <div class="step" id="s3">
+    <!-- PASO 4: Mail -->
+    <div class="step" id="s4">
       <div class="step-title">Tu mail</div>
       <div class="step-desc">Te enviamos la confirmación ahí</div>
       <label class="field-label">Correo electrónico</label>
       <input type="email" id="mail" placeholder="ejemplo@mail.com" inputmode="email" autocomplete="email">
       <button class="btn btn-main" onclick="enviar()">Enviar registro ✓</button>
-      <button class="btn btn-back" onclick="ir(2)">← Volver</button>
+      <button class="btn btn-back" onclick="ir(3)">← Volver</button>
     </div>
 
+    <!-- LOADING -->
     <div id="loadingScreen">
       <div class="spinner"></div>
       <div class="loading-text">Enviando tu registro...</div>
       <div class="loading-sub">Esto tarda solo unos segundos</div>
     </div>
 
+    <!-- ÉXITO -->
     <div id="successScreen">
       <div class="success-circle">
         <svg viewBox="0 0 24 24"><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -131,13 +157,11 @@
       <div class="success-title">¡Gracias por reciclar!</div>
       <div class="success-sub">Tu entrega fue registrada.</div>
       <div class="success-pill">¡Seguimos construyendo juntos!</div>
-
       <div style="margin-top: 1.5rem; background: #f0f9f8; border-radius: 20px; padding: 1.25rem 1.25rem 1rem; text-align: left;">
         <p style="font-size: 15px; font-weight: 900; color: #57aba9; margin: 0 0 8px;">¡Tus beneficios se activan en 48 hs en la App Buply!</p>
         <p style="font-size: 13px; font-weight: 600; color: #616160; line-height: 1.6; margin: 0 0 10px;">Descargá la app y creá tu cuenta con el DNI que usaste en este formulario. Disponible para <strong>iPhone y Android</strong>.</p>
         <p style="font-size: 13px; font-weight: 600; color: #616160; line-height: 1.6; margin: 0;">Durante 30 días vas a poder disfrutar de <strong>descuentos exclusivos</strong> en distintas marcas y categorías como recompensa por tu compromiso.</p>
       </div>
-
       <div style="margin-top: 1rem; background: #57aba9; border-radius: 16px; padding: 1rem 1.25rem; text-align: center;">
         <p style="font-size: 13px; font-weight: 900; color: #fff; margin: 0; letter-spacing: 0.3px;">Seguinos en Instagram</p>
         <p style="font-size: 18px; font-weight: 900; color: #f8ecb6; margin: 4px 0 0;">@buply.ar</p>
@@ -152,27 +176,23 @@
 
   let paso = 0;
   let fotoBase64 = null;
-  let usuarioGuardado = null;
 
-  // Al cargar la página, verificar si ya hay datos guardados
   window.onload = function() {
     const datosGuardados = localStorage.getItem('buply_usuario');
     if (datosGuardados) {
-      usuarioGuardado = JSON.parse(datosGuardados);
-      // Modo rápido: mostrar saludo y ir directo a foto
-      document.getElementById('s0').classList.remove('visible');
-      document.getElementById('d0').classList.add('done');
-      document.getElementById('d1').classList.add('done');
-      document.getElementById('d2').classList.add('done');
-      
-      // Mostrar paso de foto directamente con saludo
-      document.getElementById('step-title-foto').textContent = '¡Hola de nuevo, ' + usuarioGuardado.nombre + '!';
-      document.getElementById('step-desc-foto').textContent = 'Sacá una foto de lo que trajiste hoy';
-      document.getElementById('s2').classList.add('visible');
-      paso = 2;
-
-      // Ocultar botón volver en modo rápido
-      document.getElementById('btnVolver2').style.display = 'none';
+      const u = JSON.parse(datosGuardados);
+      // Pre-cargar campos con datos guardados
+      document.getElementById('nombre').value = u.nombre || '';
+      document.getElementById('apellido').value = u.apellido || '';
+      document.getElementById('dni').value = u.dni || '';
+      document.getElementById('mail').value = u.mail || '';
+      // Marcar visualmente como pre-cargados
+      ['nombre','apellido','dni','mail'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.value) el.classList.add('prefilled');
+      });
+      // Cambiar título de bienvenida
+      document.getElementById('title-s0').textContent = '¡Hola de nuevo, ' + u.nombre + '!';
     }
   };
 
@@ -184,6 +204,14 @@
     if (n === 2) {
       const dni = document.getElementById('dni').value.trim();
       if (!dni || dni.length < 7) { marcarError('dni'); return; }
+    }
+    if (n === 3) {
+      const estacion = document.getElementById('estacion').value;
+      if (!estacion) {
+        document.getElementById('estacion').classList.add('error');
+        setTimeout(() => document.getElementById('estacion').classList.remove('error'), 2000);
+        return;
+      }
     }
     document.getElementById('s' + paso).classList.remove('visible');
     document.getElementById('d' + paso).classList.remove('active');
@@ -229,34 +257,22 @@
   }
 
   function enviar() {
-    let payload;
+    const mail = document.getElementById('mail').value.trim();
+    if (!mail || !mail.includes('@')) { marcarError('mail'); return; }
 
-    if (usuarioGuardado) {
-      // Usuario ya registrado — solo necesita la foto
-      payload = {
-        nombre: usuarioGuardado.nombre,
-        apellido: usuarioGuardado.apellido,
-        dni: usuarioGuardado.dni,
-        mail: usuarioGuardado.mail,
-        foto: fotoBase64
-      };
-      document.getElementById('s2').classList.remove('visible');
-    } else {
-      // Usuario nuevo
-      const mail = document.getElementById('mail').value.trim();
-      if (!mail || !mail.includes('@')) { marcarError('mail'); return; }
-      payload = {
-        nombre: document.getElementById('nombre').value.trim(),
-        apellido: document.getElementById('apellido').value.trim(),
-        dni: document.getElementById('dni').value.trim(),
-        mail: mail,
-        foto: fotoBase64
-      };
-      // Guardar datos para la próxima vez
-      localStorage.setItem('buply_usuario', JSON.stringify(payload));
-      document.getElementById('s3').classList.remove('visible');
-    }
+    const payload = {
+      nombre: document.getElementById('nombre').value.trim(),
+      apellido: document.getElementById('apellido').value.trim(),
+      dni: document.getElementById('dni').value.trim(),
+      mail: mail,
+      estacion: document.getElementById('estacion').value,
+      foto: fotoBase64
+    };
 
+    // Guardar/actualizar datos para la próxima vez
+    localStorage.setItem('buply_usuario', JSON.stringify(payload));
+
+    document.getElementById('s4').classList.remove('visible');
     document.getElementById('dots').style.display = 'none';
     document.getElementById('loadingScreen').style.display = 'block';
 
