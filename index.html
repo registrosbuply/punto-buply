@@ -260,29 +260,39 @@
     const mail = document.getElementById('mail').value.trim();
     if (!mail || !mail.includes('@')) { marcarError('mail'); return; }
 
+    const fotoData = fotoBase64 ? fotoBase64.split(',')[1] : '';
     const payload = {
       nombre: document.getElementById('nombre').value.trim(),
       apellido: document.getElementById('apellido').value.trim(),
       dni: document.getElementById('dni').value.trim(),
       mail: mail,
-      estacion: document.getElementById('estacion').value,
-      foto: fotoBase64
+      provincia: 'Bariloche',
+      ubicacion: document.getElementById('estacion').value,
+      peso: '',
+      fecha: new Date().toLocaleString('es-AR'),
+      foto: fotoData,
+      nombreFoto: 'foto.jpg'
     };
 
     // Guardar/actualizar datos para la próxima vez
-    localStorage.setItem('buply_usuario', JSON.stringify(payload));
+    const datosLocales = {
+      nombre: payload.nombre,
+      apellido: payload.apellido,
+      dni: payload.dni,
+      mail: mail,
+      estacion: payload.ubicacion
+    };
+    localStorage.setItem('buply_usuario', JSON.stringify(datosLocales));
 
     document.getElementById('s4').classList.remove('visible');
     document.getElementById('dots').style.display = 'none';
     document.getElementById('loadingScreen').style.display = 'block';
 
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(payload));
-
     fetch(SCRIPT_URL, {
       method: 'POST',
-      body: formData,
-      mode: 'no-cors'
+      body: JSON.stringify(payload),
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' }
     })
     .then(() => {
       document.getElementById('loadingScreen').style.display = 'none';
